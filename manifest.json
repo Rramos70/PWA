@@ -1,0 +1,32 @@
+{
+  "short_name": "Piratas SBC",
+  "name": "Piratas de Tenerife S.B.C.",
+  "description": "Aplicación oficial del equipo de softball Piratas de Tenerife S.B.C. Calendario, plantilla, avisos y confirmación de asistencia.",
+  "icons": [
+    {
+      "src": "/icons/icon-192x192.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512x512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/maskable-icon-512x512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "maskable"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#0d1b2a",
+  "theme_color": "#1b263b",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "lang": "es-ES",
+  "categories": ["sports", "utilities"]
+}

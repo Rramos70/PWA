@@ -1,0 +1,35 @@
+[
+  {
+    "id": 1,
+    "jornada": "Jornada 4",
+    "rival": "Tenerife Titans S.B.C.",
+    "local": true,
+    "fecha": "22 de Noviembre, 2026",
+    "hora": "11:00",
+    "campo": "Campo de Béisbol La Orotava",
+    "estado": "Pendiente",
+    "marcador": "- : -"
+  },
+  {
+    "id": 2,
+    "jornada": "Jornada 5",
+    "rival": "Marlins B.C. B",
+    "local": false,
+    "fecha": "29 de Noviembre, 2026",
+    "hora": "10:30",
+    "campo": "Municipal de Béisbol El Nido",
+    "estado": "Pendiente",
+    "marcador": "- : -"
+  },
+  {
+    "id": 3,
+    "jornada": "Jornada 3",
+    "rival": "Cardinals Las Palmas",
+    "local": true,
+    "fecha": "15 de Noviembre, 2026",
+    "hora": "12:00",
+    "campo": "Municipal de Béisbol El Nido",
+    "estado": "Finalizado",
+    "marcador": "12 - 8 (G)"
+  }
+]

@@ -1,0 +1,1295 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Piratas de Tenerife S.B.C.</title>
+
+    <!-- PWA Meta Tags & Manifest -->
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#0d1b2a" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta
+      name="apple-mobile-web-app-status-bar-style"
+      content="black-translucent"
+    />
+    <meta name="apple-mobile-web-app-title" content="Piratas SBC" />
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+
+    <!-- Tailwind CSS (vía CDN) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome para Iconos -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+  </head>
+  <body
+    class="bg-slate-950 text-slate-100 font-sans min-h-screen flex flex-col antialiased selection:bg-blue-600 selection:text-white"
+  >
+    <!-- Cabecera / Header -->
+    <header
+      class="bg-slate-900/90 backdrop-blur border-b border-slate-800 sticky top-0 z-50 px-4 py-3 flex items-center justify-between shadow-md"
+    >
+      <div class="flex items-center space-x-3">
+        <div
+          class="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center font-bold text-xl shadow-inner border border-blue-400"
+        >
+          🏴‍☠️
+        </div>
+        <div>
+          <h1 class="font-bold text-base tracking-wide leading-tight">
+            Piratas de Tenerife
+          </h1>
+          <span class="text-xs text-blue-400 font-medium">Softball Club</span>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <div
+          id="offline-badge"
+          class="hidden text-xs bg-amber-500/20 text-amber-400 px-2 py-1 rounded-full border border-amber-500/30 flex items-center gap-1 font-medium"
+        >
+          <i class="fa-solid fa-wifi"></i> Offline
+        </div>
+        <div
+          id="user-status-badge"
+          class="text-xs px-2.5 py-1 rounded-full border border-slate-800 bg-slate-900 text-slate-300 flex items-center gap-1.5 font-medium"
+        >
+          <i class="fa-solid fa-circle-user text-blue-400"></i>
+          <span id="header-user-name">Invitado</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Contenido Principal -->
+    <main class="flex-1 max-w-md w-full mx-auto p-4 pb-24">
+      <!-- Banner de Instalación PWA -->
+      <div
+        id="install-banner"
+        class="hidden mb-4 bg-gradient-to-r from-blue-900 to-indigo-900 border border-blue-700/50 rounded-2xl p-4 shadow-lg flex items-center justify-between"
+      >
+        <div class="flex items-center space-x-3">
+          <div class="text-3xl">📱</div>
+          <div>
+            <h3 class="font-bold text-sm">Instalar App Oficial</h3>
+            <p class="text-xs text-slate-300">
+              Acceso rápido y uso sin conexión.
+            </p>
+          </div>
+        </div>
+        <button
+          id="btn-install"
+          class="bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold px-3.5 py-2 rounded-xl transition shadow"
+        >
+          Instalar
+        </button>
+      </div>
+
+      <!-- VISTA 1: INICIO (PARTIDOS DEL DÍA MÁS PRÓXIMO Y AVISOS) -->
+      <section id="view-inicio" class="space-y-5">
+        <div class="space-y-4">
+          <div class="flex items-center justify-between">
+            <h2
+              class="text-sm font-bold text-slate-200 uppercase tracking-wider flex items-center gap-2"
+            >
+              <i class="fa-solid fa-baseball text-blue-400"></i> Próxima Jornada
+              / Convocatoria
+            </h2>
+          </div>
+
+          <div id="proximos-partidos-container" class="space-y-4">
+            <div
+              class="bg-slate-900 border border-slate-800 rounded-2xl p-5 text-center text-xs text-slate-400"
+            >
+              Cargando próxima jornada...
+            </div>
+          </div>
+        </div>
+
+        <!-- Pizarra de Avisos -->
+        <div
+          class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-md"
+        >
+          <h3
+            class="font-bold text-sm text-slate-200 mb-3 flex items-center gap-2"
+          >
+            <i class="fa-solid fa-bullhorn text-amber-400"></i> Tablón de Avisos
+          </h3>
+          <div id="lista-avisos" class="space-y-3 text-xs">
+            <p class="text-slate-400 text-center py-2">Cargando avisos...</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- VISTA 2: CALENDARIO Y RESULTADOS -->
+      <section id="view-calendario" class="hidden space-y-4">
+        <div class="flex justify-between items-center mb-1">
+          <h2 class="text-lg font-bold">Calendario y Resultados</h2>
+          <span
+            class="text-[11px] text-blue-400 bg-blue-950/80 px-2.5 py-1 rounded-full border border-blue-800/50 font-medium"
+            >En vivo</span
+          >
+        </div>
+        <div id="lista-calendario" class="space-y-3">
+          <p class="text-xs text-slate-400 text-center py-6">
+            Cargando partidos...
+          </p>
+        </div>
+      </section>
+
+      <!-- VISTA 3: ROSTER (PLANTILLA) -->
+      <section id="view-roster" class="hidden space-y-4">
+        <div class="flex justify-between items-center mb-1">
+          <h2 class="text-lg font-bold">Plantilla Oficial</h2>
+          <span
+            id="roster-count"
+            class="text-[11px] text-blue-400 bg-blue-950/80 px-2.5 py-1 rounded-full border border-blue-800/50 font-medium"
+            >0 jugadores</span
+          >
+        </div>
+        <div id="lista-roster" class="grid gap-2.5">
+          <p class="text-xs text-slate-400 text-center py-6">
+            Cargando plantilla...
+          </p>
+        </div>
+      </section>
+
+      <!-- VISTA 4: PANEL DE MÁNGER (ADMIN) -->
+      <section id="view-admin" class="hidden space-y-5">
+        <div class="flex items-center justify-between">
+          <h2 class="text-lg font-bold text-amber-400 flex items-center gap-2">
+            <i class="fa-solid fa-shield-halved"></i> Panel del Mánager
+          </h2>
+          <span
+            class="text-[10px] bg-amber-500/20 text-amber-300 px-2.5 py-1 rounded-full border border-amber-500/30"
+            >Admin</span
+          >
+        </div>
+
+        <!-- Formulario: Publicar Aviso con Archivo Adjunto -->
+        <div
+          class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-md"
+        >
+          <h3 class="font-bold text-sm mb-3 text-slate-200">
+            📢 Publicar Aviso en Pizarra
+          </h3>
+          <form
+            id="form-aviso"
+            onsubmit="window.publicarAviso(event)"
+            class="space-y-3 text-xs"
+          >
+            <textarea
+              id="input-aviso"
+              rows="2"
+              required
+              placeholder="Ej. Cambio de hora en el entrenamiento..."
+              class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-slate-100 focus:outline-none focus:border-amber-500"
+            ></textarea>
+
+            <div>
+              <label class="block text-[11px] text-slate-400 mb-1 font-medium"
+                >Adjuntar imagen (opcional):</label
+              >
+              <input
+                type="file"
+                id="input-aviso-archivo"
+                accept="image/*"
+                class="w-full text-xs text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-slate-800 file:text-slate-200 hover:file:bg-slate-700 cursor-pointer"
+              />
+            </div>
+
+            <button
+              type="submit"
+              class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-2.5 rounded-xl transition"
+            >
+              Publicar Aviso
+            </button>
+          </form>
+        </div>
+
+        <!-- Formulario: Crear Partido -->
+        <div
+          class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-md"
+        >
+          <h3 class="font-bold text-sm mb-3 text-slate-200">
+            ⚾ Programar Nuevo Partido
+          </h3>
+          <form
+            id="form-partido"
+            onsubmit="window.crearPartido(event)"
+            class="space-y-2.5 text-xs"
+          >
+            <div class="grid grid-cols-2 gap-2">
+              <input
+                type="text"
+                id="partido-jornada"
+                placeholder="Jornada (ej. J5)"
+                required
+                class="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-slate-100"
+              />
+              <select
+                id="partido-local"
+                class="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-slate-100"
+              >
+                <option value="true">🏠 Local (Casa)</option>
+                <option value="false">✈️ Visitante (Fuera)</option>
+              </select>
+            </div>
+            <input
+              type="text"
+              id="partido-rival"
+              placeholder="Equipo Rival (ej. Marlins B.C.)"
+              required
+              class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-slate-100"
+            />
+            <div class="grid grid-cols-2 gap-2">
+              <input
+                type="text"
+                id="partido-fecha"
+                placeholder="Fecha (ej. 28 Nov)"
+                required
+                class="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-slate-100"
+              />
+              <input
+                type="text"
+                id="partido-hora"
+                placeholder="Hora (ej. 11:00)"
+                required
+                class="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-slate-100"
+              />
+            </div>
+            <input
+              type="text"
+              id="partido-campo"
+              placeholder="Campo de juego"
+              required
+              class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-slate-100"
+            />
+            <button
+              type="submit"
+              class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-2.5 rounded-xl transition mt-1"
+            >
+              Añadir al Calendario
+            </button>
+          </form>
+        </div>
+
+        <!-- Formulario: Añadir Jugador al Roster -->
+        <div
+          class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-md"
+        >
+          <h3 class="font-bold text-sm mb-3 text-slate-200">
+            🧢 Añadir Jugador a la Plantilla
+          </h3>
+          <form
+            id="form-jugador"
+            onsubmit="window.crearJugador(event)"
+            class="space-y-2.5 text-xs"
+          >
+            <div class="grid grid-cols-3 gap-2">
+              <input
+                type="number"
+                id="jugador-dorsal"
+                placeholder="Dorsal (#)"
+                required
+                min="0"
+                max="99"
+                class="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-slate-100"
+              />
+              <input
+                type="text"
+                id="jugador-nombre"
+                placeholder="Nombre y Apellido"
+                required
+                class="col-span-2 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-slate-100"
+              />
+            </div>
+            <div class="grid grid-cols-2 gap-2">
+              <input
+                type="text"
+                id="jugador-posicion"
+                placeholder="Posición (ej. Pitcher / SS)"
+                required
+                class="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-slate-100"
+              />
+              <select
+                id="jugador-estado"
+                class="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-slate-100"
+              >
+                <option value="Activo">🟢 Activo</option>
+                <option value="Lesionado">🟡 Lesionado</option>
+                <option value="Baja">🔴 Baja</option>
+              </select>
+            </div>
+            <button
+              type="submit"
+              class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 rounded-xl transition mt-1"
+            >
+              Guardar Jugador
+            </button>
+          </form>
+        </div>
+
+        <!-- Gestión rápida de Partidos -->
+        <div
+          class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-md"
+        >
+          <h3 class="font-bold text-sm mb-3 text-slate-200">
+            🏆 Gestionar Resultados y MVP
+          </h3>
+          <div id="admin-lista-partidos" class="space-y-2 text-xs">
+            <p class="text-slate-400 text-center">Cargando partidos...</p>
+          </div>
+        </div>
+
+        <!-- Gestión rápida de Jugadores -->
+        <div
+          class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-md"
+        >
+          <h3 class="font-bold text-sm mb-3 text-slate-200">
+            📋 Gestionar Plantilla
+          </h3>
+          <div id="admin-lista-jugadores" class="space-y-2 text-xs">
+            <p class="text-slate-400 text-center">Cargando jugadores...</p>
+          </div>
+        </div>
+
+        <!-- Gestión rápida de Avisos -->
+        <div
+          class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-md"
+        >
+          <h3 class="font-bold text-sm mb-3 text-slate-200">
+            📢 Gestionar Avisos
+          </h3>
+          <div id="admin-lista-avisos" class="space-y-2 text-xs">
+            <p class="text-slate-400 text-center">Cargando avisos...</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- VISTA 5: PERFIL / LOGIN -->
+      <section id="view-auth" class="hidden space-y-4">
+        <div
+          id="login-card"
+          class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-md text-center"
+        >
+          <h2 class="text-lg font-bold mb-1">Acceso de Miembros</h2>
+          <p class="text-xs text-slate-400 mb-5">
+            Identifícate para confirmar tu asistencia a los partidos.
+          </p>
+          <button
+            onclick="loginConGoogle()"
+            class="w-full bg-white hover:bg-slate-100 text-slate-900 font-semibold text-xs py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition shadow"
+          >
+            <i class="fa-brands fa-google text-red-500 text-base"></i> Iniciar
+            sesión con Google
+          </button>
+        </div>
+
+        <div
+          id="profile-card"
+          class="hidden bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-md text-center"
+        >
+          <div
+            class="w-16 h-16 bg-blue-600 rounded-full mx-auto flex items-center justify-center text-2xl font-bold text-white mb-3 border-2 border-blue-400 shadow-inner"
+          >
+            ⚾
+          </div>
+          <h3 id="profile-user-name" class="font-bold text-base">Jugador</h3>
+          <p id="profile-user-email" class="text-xs text-slate-400 mb-5">
+            correo@ejemplo.com
+          </p>
+          <button
+            onclick="cerrarSesion()"
+            class="bg-rose-600/30 hover:bg-rose-600/50 text-rose-300 border border-rose-500/40 text-xs px-4 py-2 rounded-xl font-medium transition"
+          >
+            Cerrar Sesión
+          </button>
+        </div>
+      </section>
+    </main>
+
+    <!-- Modal para Ampliar Imagen (Lightbox) -->
+    <div
+      id="image-modal"
+      class="hidden fixed inset-0 z-50 bg-black/90 backdrop-blur-sm flex items-center justify-center p-4"
+      onclick="cerrarModalImagen()"
+    >
+      <div class="relative max-w-lg w-full">
+        <button
+          onclick="cerrarModalImagen()"
+          class="absolute -top-10 right-0 text-white text-2xl px-3 py-1 hover:text-amber-400 transition"
+        >
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+        <img
+          id="modal-img"
+          src=""
+          class="w-full max-h-[80vh] object-contain rounded-xl border border-slate-800 shadow-2xl"
+        />
+      </div>
+    </div>
+
+    <!-- Barra de Navegación Inferior -->
+    <nav
+      class="bg-slate-900/95 backdrop-blur border-t border-slate-800 fixed bottom-0 left-0 right-0 py-2.5 px-4 flex justify-around items-center z-50"
+    >
+      <button
+        onclick="switchTab('inicio')"
+        id="nav-inicio"
+        class="flex flex-col items-center text-blue-400 transition"
+      >
+        <i class="fa-solid fa-house text-lg"></i>
+        <span class="text-[10px] mt-1 font-medium">Inicio</span>
+      </button>
+      <button
+        onclick="switchTab('calendario')"
+        id="nav-calendario"
+        class="flex flex-col items-center text-slate-400 hover:text-slate-200 transition"
+      >
+        <i class="fa-solid fa-calendar-days text-lg"></i>
+        <span class="text-[10px] mt-1 font-medium">Partidos</span>
+      </button>
+      <button
+        onclick="switchTab('roster')"
+        id="nav-roster"
+        class="flex flex-col items-center text-slate-400 hover:text-slate-200 transition"
+      >
+        <i class="fa-solid fa-users text-lg"></i>
+        <span class="text-[10px] mt-1 font-medium">Plantilla</span>
+      </button>
+      <!-- Botón Admin -->
+      <button
+        onclick="switchTab('admin')"
+        id="nav-admin"
+        class="hidden flex flex-col items-center text-slate-400 hover:text-amber-400 transition"
+      >
+        <i class="fa-solid fa-shield-halved text-lg"></i>
+        <span class="text-[10px] mt-1 font-medium">Mánager</span>
+      </button>
+      <button
+        onclick="switchTab('auth')"
+        id="nav-auth"
+        class="flex flex-col items-center text-slate-400 hover:text-slate-200 transition"
+      >
+        <i class="fa-solid fa-user text-lg"></i>
+        <span class="text-[10px] mt-1 font-medium" id="nav-auth-label"
+          >Acceso</span
+        >
+      </button>
+    </nav>
+
+    <!-- Script Principal de Firebase y Lógica -->
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+      import {
+        getAuth,
+        signInWithPopup,
+        GoogleAuthProvider,
+        signOut,
+        onAuthStateChanged,
+      } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+      import {
+        getFirestore,
+        collection,
+        doc,
+        setDoc,
+        addDoc,
+        updateDoc,
+        deleteDoc,
+        onSnapshot,
+        query,
+        orderBy,
+      } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyARG5ZdWzAWoIQ2VXxzpYfLK3jrWrR8FtM",
+        authDomain: "piratas-tenerife-sbc.firebaseapp.com",
+        projectId: "piratas-tenerife-sbc",
+        storageBucket: "piratas-tenerife-sbc.firebasestorage.app",
+        messagingSenderId: "121693041891",
+        appId: "1:121693041891:web:9b80d9e765b2580f2bc1d6",
+      };
+
+      const app = initializeApp(firebaseConfig);
+      const auth = getAuth(app);
+      const db = getFirestore(app);
+      const provider = new GoogleAuthProvider();
+
+      let currentUser = null;
+      let isAdmin = false;
+
+      const ADMIN_EMAILS = [
+        "rodolforamosestudios@gmail.com",
+        "piratasbeisbolysoftball@gmail.com",
+      ];
+
+      window.loginConGoogle = () => {
+        signInWithPopup(auth, provider).catch((err) =>
+          alert("Error al iniciar sesión: " + err.message),
+        );
+      };
+      window.cerrarSesion = () => {
+        signOut(auth);
+      };
+
+      onAuthStateChanged(auth, (user) => {
+        currentUser = user;
+        const headerName = document.getElementById("header-user-name");
+        const navLabel = document.getElementById("nav-auth-label");
+        const navAdmin = document.getElementById("nav-admin");
+
+        if (user) {
+          headerName.textContent = user.displayName
+            ? user.displayName.split(" ")[0]
+            : "Usuario";
+          navLabel.textContent = "Perfil";
+          document.getElementById("login-card").classList.add("hidden");
+          document.getElementById("profile-card").classList.remove("hidden");
+          document.getElementById("profile-user-name").textContent =
+            user.displayName;
+          document.getElementById("profile-user-email").textContent =
+            user.email;
+
+          if (ADMIN_EMAILS.includes(user.email)) {
+            isAdmin = true;
+            navAdmin.classList.remove("hidden");
+          } else {
+            isAdmin = false;
+            navAdmin.classList.add("hidden");
+          }
+        } else {
+          headerName.textContent = "Invitado";
+          navLabel.textContent = "Acceso";
+          isAdmin = false;
+          navAdmin.classList.add("hidden");
+          document.getElementById("login-card").classList.remove("hidden");
+          document.getElementById("profile-card").classList.add("hidden");
+        }
+
+        escucharAvisos();
+        escucharPartidosPendientes();
+        escucharRoster();
+      });
+
+      // Modal de Imagen Ampliada Global
+      window.ampliarImagen = (url) => {
+        const modal = document.getElementById("image-modal");
+        const modalImg = document.getElementById("modal-img");
+        modalImg.src = url;
+        modal.classList.remove("hidden");
+      };
+
+      window.cerrarModalImagen = () => {
+        const modal = document.getElementById("image-modal");
+        modal.classList.add("hidden");
+      };
+
+      window.votarAsistenciaPartido = async (partidoId, asiste) => {
+        if (!currentUser) return alert("Debes iniciar sesión primero.");
+
+        try {
+          const docRef = doc(
+            db,
+            "partidos",
+            partidoId,
+            "asistencia",
+            currentUser.uid,
+          );
+          await setDoc(docRef, {
+            nombre: currentUser.displayName,
+            email: currentUser.email,
+            foto: currentUser.photoURL,
+            asiste: asiste,
+            fechaVoto: new Date().toISOString(),
+          });
+        } catch (error) {
+          console.error("Error al registrar asistencia:", error);
+          alert("Ocurrió un error al guardar tu voto.");
+        }
+      };
+
+      // Publicar Aviso convirtiendo archivo adjunto a Base64
+      window.publicarAviso = async (e) => {
+        e.preventDefault();
+        if (!isAdmin) return alert("Acceso no autorizado.");
+
+        const textarea = document.getElementById("input-aviso");
+        const inputArchivo = document.getElementById("input-aviso-archivo");
+        const texto = textarea.value.trim();
+        if (!texto) return;
+
+        const procesarPublicacion = async (imagenBase64 = "") => {
+          try {
+            await addDoc(collection(db, "avisos"), {
+              mensaje: texto,
+              imagen: imagenBase64,
+              autor: currentUser ? currentUser.displayName : "Directiva",
+              fecha: new Date().toLocaleDateString("es-ES", {
+                day: "numeric",
+                month: "short",
+                hour: "2-digit",
+                minute: "2-digit",
+              }),
+              timestamp: Date.now(),
+            });
+
+            textarea.value = "";
+            inputArchivo.value = "";
+            const formAviso = document.getElementById("form-aviso");
+            if (formAviso) formAviso.reset();
+
+            alert("¡Aviso publicado con éxito!");
+          } catch (error) {
+            console.error("Error al publicar aviso:", error);
+            alert("Hubo un error al publicar el aviso.");
+          }
+        };
+
+        // Si hay un archivo adjunto, lo leemos y convertimos
+        if (inputArchivo.files && inputArchivo.files[0]) {
+          const archivo = inputArchivo.files[0];
+          const lector = new FileReader();
+          lector.onload = function (uploadEvent) {
+            procesarPublicacion(uploadEvent.target.result);
+          };
+          lector.readAsDataURL(archivo);
+        } else {
+          procesarPublicacion("");
+        }
+      };
+
+      window.crearPartido = async (e) => {
+        e.preventDefault();
+        if (!isAdmin) return alert("Acceso no autorizado.");
+
+        try {
+          await addDoc(collection(db, "partidos"), {
+            jornada: document.getElementById("partido-jornada").value.trim(),
+            rival: document.getElementById("partido-rival").value.trim(),
+            local: document.getElementById("partido-local").value === "true",
+            fecha: document.getElementById("partido-fecha").value.trim(),
+            hora: document.getElementById("partido-hora").value.trim(),
+            campo: document.getElementById("partido-campo").value.trim(),
+            estado: "Pendiente",
+            marcador: "- : -",
+            mvp: "Por definir",
+            timestamp: Date.now(),
+          });
+
+          document.getElementById("partido-jornada").value = "";
+          document.getElementById("partido-rival").value = "";
+          document.getElementById("partido-fecha").value = "";
+          document.getElementById("partido-hora").value = "";
+          document.getElementById("partido-campo").value = "";
+          document.getElementById("partido-local").value = "true";
+
+          const formPartido = document.getElementById("form-partido");
+          if (formPartido) formPartido.reset();
+
+          alert("¡Partido programado con éxito!");
+        } catch (error) {
+          console.error("Error al crear partido:", error);
+          alert("Hubo un error al guardar el partido.");
+        }
+      };
+
+      window.crearJugador = async (e) => {
+        e.preventDefault();
+        if (!isAdmin) return alert("Acceso no autorizado.");
+
+        try {
+          await addDoc(collection(db, "jugadores"), {
+            dorsal: Number(document.getElementById("jugador-dorsal").value),
+            nombre: document.getElementById("jugador-nombre").value.trim(),
+            posicion: document.getElementById("jugador-posicion").value.trim(),
+            estado: document.getElementById("jugador-estado").value,
+          });
+
+          document.getElementById("jugador-dorsal").value = "";
+          document.getElementById("jugador-nombre").value = "";
+          document.getElementById("jugador-posicion").value = "";
+          document.getElementById("jugador-estado").value = "Activo";
+
+          const formJugador = document.getElementById("form-jugador");
+          if (formJugador) formJugador.reset();
+
+          alert("¡Jugador añadido a la plantilla!");
+        } catch (error) {
+          console.error("Error al añadir jugador:", error);
+          alert("No se pudo guardar el jugador.");
+        }
+      };
+
+      window.editarJugador = async (
+        jugadorId,
+        dorsalActual,
+        nombreActual,
+        posicionActual,
+        estadoActual,
+      ) => {
+        if (!isAdmin) return;
+        const nuevoDorsal = prompt("Número de Dorsal:", dorsalActual);
+        if (nuevoDorsal === null) return;
+        const nuevoNombre = prompt("Nombre completo:", nombreActual);
+        if (nuevoNombre === null) return;
+        const nuevaPosicion = prompt("Posición:", posicionActual);
+        if (nuevaPosicion === null) return;
+        const nuevoEstado = prompt(
+          "Estado (Activo / Lesionado / Baja):",
+          estadoActual,
+        );
+        if (nuevoEstado === null) return;
+
+        try {
+          await updateDoc(doc(db, "jugadores", jugadorId), {
+            dorsal: Number(nuevoDorsal),
+            nombre: nuevoNombre.trim(),
+            posicion: nuevaPosicion.trim(),
+            estado: nuevoEstado.trim() || "Activo",
+          });
+          alert("Datos del jugador actualizados.");
+        } catch (error) {
+          console.error("Error al editar jugador:", error);
+          alert("No se pudo editar el jugador.");
+        }
+      };
+
+      window.eliminarJugador = async (jugadorId) => {
+        if (!isAdmin) return alert("Acceso no autorizado.");
+        if (
+          confirm("¿Seguro que deseas eliminar a este jugador de la plantilla?")
+        ) {
+          try {
+            await deleteDoc(doc(db, "jugadores", jugadorId));
+            alert("Jugador eliminado.");
+          } catch (error) {
+            console.error("Error al eliminar jugador:", error);
+            alert("No se pudo eliminar el jugador.");
+          }
+        }
+      };
+
+      window.gestionarPartidoResultado = async (
+        partidoId,
+        marcadorActual,
+        mvpActual,
+        estadoActual,
+      ) => {
+        if (!isAdmin) return;
+        const nuevoMarcador = prompt(
+          "Introduce el resultado final (ej. 12 - 5):",
+          marcadorActual !== "- : -" ? marcadorActual : "",
+        );
+        if (nuevoMarcador === null) return;
+
+        const nuevoMvp = prompt(
+          "Introduce el Jugador Destacado / MVP (ej. #23 Alejandro Pérez):",
+          mvpActual !== "Por definir" ? mvpActual : "",
+        );
+        if (nuevoMvp === null) return;
+
+        const finalizar = confirm("¿Marcar el partido como FINALIZADO?");
+
+        try {
+          await updateDoc(doc(db, "partidos", partidoId), {
+            marcador: nuevoMarcador.trim(),
+            mvp: nuevoMvp.trim() || "Por definir",
+            estado: finalizar ? "Finalizado" : estadoActual || "Pendiente",
+          });
+          alert("Resultado y MVP actualizados correctamente.");
+        } catch (error) {
+          console.error("Error al actualizar resultado:", error);
+          alert("No se pudo actualizar el partido.");
+        }
+      };
+
+      window.editarPartido = async (
+        partidoId,
+        jornadaActual,
+        rivalActual,
+        fechaActual,
+        horaActual,
+        campoActual,
+      ) => {
+        if (!isAdmin) return;
+        const nuevaJornada = prompt("Jornada:", jornadaActual);
+        if (nuevaJornada === null) return;
+        const nuevoRival = prompt("Rival:", rivalActual);
+        if (nuevoRival === null) return;
+        const nuevaFecha = prompt("Fecha:", fechaActual);
+        if (nuevaFecha === null) return;
+        const nuevaHora = prompt("Hora:", horaActual);
+        if (nuevaHora === null) return;
+        const nuevoCampo = prompt("Campo:", campoActual);
+        if (nuevoCampo === null) return;
+
+        try {
+          await updateDoc(doc(db, "partidos", partidoId), {
+            jornada: nuevaJornada.trim(),
+            rival: nuevoRival.trim(),
+            fecha: nuevaFecha.trim(),
+            hora: nuevaHora.trim(),
+            campo: nuevoCampo.trim(),
+          });
+          alert("Partido actualizado correctamente.");
+        } catch (error) {
+          console.error("Error al editar partido:", error);
+          alert("No se pudo editar el partido.");
+        }
+      };
+
+      window.eliminarPartido = async (partidoId) => {
+        if (!isAdmin) return alert("Acceso no autorizado.");
+        if (
+          confirm(
+            "¿Estás seguro de que deseas eliminar este partido permanentemente?",
+          )
+        ) {
+          try {
+            await deleteDoc(doc(db, "partidos", partidoId));
+            alert("Partido eliminado.");
+          } catch (error) {
+            console.error("Error al eliminar partido:", error);
+            alert("No se pudo eliminar el partido.");
+          }
+        }
+      };
+
+      window.eliminarAviso = async (avisoId) => {
+        if (!isAdmin) return alert("Acceso no autorizado.");
+        if (confirm("¿Estás seguro de eliminar este aviso?")) {
+          try {
+            await deleteDoc(doc(db, "avisos", avisoId));
+            alert("Aviso eliminado.");
+          } catch (error) {
+            console.error("Error al eliminar aviso:", error);
+            alert("No se pudo eliminar el aviso.");
+          }
+        }
+      };
+
+      let unsubscribeRoster = null;
+      function escucharRoster() {
+        if (unsubscribeRoster) unsubscribeRoster();
+        const q = query(collection(db, "jugadores"), orderBy("dorsal", "asc"));
+
+        unsubscribeRoster = onSnapshot(q, (snapshot) => {
+          const rosterList = document.getElementById("lista-roster");
+          const adminRosterList = document.getElementById(
+            "admin-lista-jugadores",
+          );
+          const rosterCount = document.getElementById("roster-count");
+          if (!rosterList) return;
+
+          rosterList.innerHTML = "";
+          if (adminRosterList) adminRosterList.innerHTML = "";
+          if (rosterCount)
+            rosterCount.textContent = `${snapshot.size} jugador${snapshot.size === 1 ? "" : "es"}`;
+
+          if (snapshot.empty) {
+            rosterList.innerHTML =
+              '<p class="text-xs text-slate-400 text-center py-6">No hay jugadores registrados en la plantilla.</p>';
+            if (adminRosterList)
+              adminRosterList.innerHTML =
+                '<p class="text-slate-500 text-center py-2">No hay jugadores en la lista.</p>';
+            return;
+          }
+
+          snapshot.forEach((docSnap) => {
+            const j = docSnap.data();
+            const jugadorId = docSnap.id;
+
+            let badgeStyle =
+              "bg-emerald-500/20 text-emerald-400 border-emerald-500/30";
+            if (j.estado === "Lesionado")
+              badgeStyle = "bg-amber-500/20 text-amber-400 border-amber-500/30";
+            if (j.estado === "Baja")
+              badgeStyle = "bg-rose-500/20 text-rose-400 border-rose-500/30";
+
+            rosterList.innerHTML += `
+                        <div class="bg-slate-900 border border-slate-800 p-3 rounded-2xl flex items-center justify-between shadow-sm">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-10 h-10 bg-blue-950 rounded-full flex items-center justify-center font-bold text-blue-400 border border-blue-800/80">#${j.dorsal}</div>
+                                <div>
+                                    <h4 class="font-bold text-sm">${j.nombre}</h4>
+                                    <p class="text-xs text-slate-400">${j.posicion}</p>
+                                </div>
+                            </div>
+                            <span class="text-[10px] px-2.5 py-1 rounded-full font-medium border ${badgeStyle}">${j.estado}</span>
+                        </div>
+                    `;
+
+            if (adminRosterList) {
+              adminRosterList.innerHTML += `
+                            <div class="flex items-center justify-between p-2.5 bg-slate-950/60 rounded-xl border border-slate-800/80">
+                                <div>
+                                    <p class="font-bold text-slate-200">#${j.dorsal} ${j.nombre}</p>
+                                    <p class="text-[10px] text-slate-400">${j.posicion} • <span class="text-blue-400">${j.estado}</span></p>
+                                </div>
+                                <div class="flex space-x-1">
+                                    <button onclick="window.editarJugador('${jugadorId}', '${j.dorsal}', '${j.nombre}', '${j.posicion}', '${j.estado}')" class="bg-blue-600 hover:bg-blue-500 text-white font-bold px-2 py-1.5 rounded-lg text-[10px] transition">
+                                        Editar
+                                    </button>
+                                    <button onclick="window.eliminarJugador('${jugadorId}')" class="bg-rose-600/30 hover:bg-rose-600/50 text-rose-300 border border-rose-500/40 px-2 py-1.5 rounded-lg text-[10px] transition" title="Eliminar jugador">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+            }
+          });
+        });
+      }
+
+      let unsubscribeAvisos = null;
+      function escucharAvisos() {
+        if (unsubscribeAvisos) unsubscribeAvisos();
+        const q = query(collection(db, "avisos"), orderBy("timestamp", "desc"));
+
+        unsubscribeAvisos = onSnapshot(q, (snapshot) => {
+          const avisosList = document.getElementById("lista-avisos");
+          const adminAvisosList = document.getElementById("admin-lista-avisos");
+          if (!avisosList) return;
+
+          avisosList.innerHTML = "";
+          if (adminAvisosList) adminAvisosList.innerHTML = "";
+
+          if (snapshot.empty) {
+            avisosList.innerHTML =
+              '<p class="text-slate-500 text-center py-2">No hay avisos recientes.</p>';
+            if (adminAvisosList)
+              adminAvisosList.innerHTML =
+                '<p class="text-slate-500 text-center py-2">No hay avisos para gestionar.</p>';
+            return;
+          }
+
+          snapshot.forEach((docSnap) => {
+            const a = docSnap.data();
+            const avisoId = docSnap.id;
+            const botonBorrar = isAdmin
+              ? `<button onclick="window.eliminarAviso('${avisoId}')" class="text-rose-400 hover:text-rose-300 text-xs px-1.5 py-0.5 rounded transition" title="Eliminar aviso"><i class="fa-solid fa-trash"></i></button>`
+              : "";
+
+            const imagenHtml = a.imagen
+              ? `<div class="mt-2"><img src="${a.imagen}" onclick="window.ampliarImagen('${a.imagen}')" class="w-full h-36 object-cover rounded-xl border border-slate-800 cursor-pointer hover:opacity-90 transition shadow" title="Haz clic para ampliar"></div>`
+              : "";
+
+            avisosList.innerHTML += `
+                        <div class="p-3 bg-slate-950/60 rounded-xl border border-slate-800/80">
+                            <div class="flex justify-between items-center text-[10px] text-slate-400 font-medium mb-1">
+                                <span>${a.autor || "Directiva"} • ${a.fecha}</span>
+                                ${botonBorrar}
+                            </div>
+                            <p class="text-slate-200 text-xs leading-relaxed">${a.mensaje}</p>
+                            ${imagenHtml}
+                        </div>
+                    `;
+
+            if (adminAvisosList) {
+              adminAvisosList.innerHTML += `
+                            <div class="flex items-center justify-between p-2.5 bg-slate-950/60 rounded-xl border border-slate-800/80">
+                                <div class="truncate mr-2">
+                                    <p class="text-[11px] text-slate-200 truncate">${a.mensaje}</p>
+                                    <p class="text-[9px] text-slate-400">${a.fecha}</p>
+                                </div>
+                                <button onclick="window.eliminarAviso('${avisoId}')" class="bg-rose-600/30 hover:bg-rose-600/50 text-rose-300 border border-rose-500/40 px-2.5 py-1.5 rounded-lg text-xs transition shrink-0" title="Eliminar aviso">
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
+                            </div>
+                        `;
+            }
+          });
+        });
+      }
+
+      const subscriptionsAsistencia = {};
+
+      function escucharPartidosPendientes() {
+        const q = query(
+          collection(db, "partidos"),
+          orderBy("timestamp", "asc"),
+        );
+
+        onSnapshot(q, (snapshot) => {
+          const containerInicio = document.getElementById(
+            "proximos-partidos-container",
+          );
+          const calList = document.getElementById("lista-calendario");
+          const adminCalList = document.getElementById("admin-lista-partidos");
+          if (!containerInicio) return;
+
+          containerInicio.innerHTML = "";
+          calList.innerHTML = "";
+          if (adminCalList) adminCalList.innerHTML = "";
+
+          if (snapshot.empty) {
+            containerInicio.innerHTML =
+              '<div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 text-center text-xs text-slate-400">No hay partidos próximos programados.</div>';
+            calList.innerHTML =
+              '<p class="text-xs text-slate-400 text-center py-6">No hay partidos programados.</p>';
+            if (adminCalList)
+              adminCalList.innerHTML =
+                '<p class="text-slate-500 text-center py-2">No hay partidos registrados.</p>';
+            return;
+          }
+
+          let fechaMasProxima = null;
+          snapshot.forEach((docSnap) => {
+            const partido = docSnap.data();
+            if (partido.estado !== "Finalizado" && !fechaMasProxima) {
+              fechaMasProxima = partido.fecha;
+            }
+          });
+
+          let hayPartidosEnFechaProxima = false;
+
+          snapshot.forEach((docSnap) => {
+            const partido = docSnap.data();
+            const partidoId = docSnap.id;
+            const esLocal = partido.local;
+            const badgeColor =
+              partido.estado === "Finalizado"
+                ? "bg-slate-800 text-slate-300 border-slate-700"
+                : "bg-blue-500/20 text-blue-400 border-blue-500/30";
+
+            if (
+              partido.estado !== "Finalizado" &&
+              partido.fecha === fechaMasProxima
+            ) {
+              hayPartidosEnFechaProxima = true;
+
+              containerInicio.innerHTML += `
+                            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 relative overflow-hidden shadow-md space-y-3">
+                                <div class="absolute right-0 top-0 translate-x-4 -translate-y-4 text-8xl opacity-10 select-none">⚾</div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-xs font-semibold text-blue-400 uppercase tracking-widest">${partido.jornada || "Partido"}</span>
+                                    <span class="text-[10px] bg-blue-500/20 text-blue-300 px-2.5 py-0.5 rounded-full border border-blue-500/30">${partido.estado}</span>
+                                </div>
+                                <h2 class="text-lg font-bold">${esLocal ? "vs." : "@"} ${partido.rival}</h2>
+                                <div class="space-y-1 text-xs text-slate-300">
+                                    <p><i class="fa-regular fa-calendar text-blue-400 w-5"></i> ${partido.fecha} - ${partido.hora}</p>
+                                    <p><i class="fa-solid fa-location-dot text-blue-400 w-5"></i> ${partido.campo}</p>
+                                </div>
+
+                                <div class="p-2.5 bg-slate-950/80 rounded-xl border border-slate-800/80 flex justify-around text-center">
+                                    <div>
+                                        <span class="text-[9px] text-slate-400 uppercase block font-semibold">Confirmados</span>
+                                        <span id="count-yes-${partidoId}" class="text-emerald-400 font-bold text-sm">0</span>
+                                    </div>
+                                    <div class="border-r border-slate-800"></div>
+                                    <div>
+                                        <span class="text-[9px] text-slate-400 uppercase block font-semibold">Bajas</span>
+                                        <span id="count-no-${partidoId}" class="text-rose-400 font-bold text-sm">0</span>
+                                    </div>
+                                </div>
+
+                                <div class="pt-2 border-t border-slate-800 flex justify-between items-center">
+                                    <span id="status-${partidoId}" class="text-[11px] text-slate-400 font-medium">${currentUser ? "Tu voto:" : "Inicia sesión"}</span>
+                                    <div class="space-x-1.5 flex">
+                                        <button onclick="window.votarAsistenciaPartido('${partidoId}', true)" ${!currentUser ? "disabled" : ""} class="disabled:opacity-40 bg-emerald-600/30 hover:bg-emerald-600/50 text-emerald-300 border border-emerald-500/40 text-xs px-3 py-1.5 rounded-xl font-medium transition">
+                                            <i class="fa-solid fa-check mr-1"></i> Sí voy
+                                        </button>
+                                        <button onclick="window.votarAsistenciaPartido('${partidoId}', false)" ${!currentUser ? "disabled" : ""} class="disabled:opacity-40 bg-rose-600/30 hover:bg-rose-600/50 text-rose-300 border border-rose-500/40 text-xs px-3 py-1.5 rounded-xl font-medium transition">
+                                            <i class="fa-solid fa-xmark mr-1"></i> No voy
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="mt-2 pt-2 border-t border-slate-800/60">
+                                    <p class="text-[10px] text-slate-400 font-semibold mb-1">Convocados confirmados:</p>
+                                    <div id="attendees-${partidoId}" class="space-y-1 text-[11px] max-h-28 overflow-y-auto">
+                                        <span class="text-slate-500">Cargando lista...</span>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+
+              if (!subscriptionsAsistencia[partidoId]) {
+                subscriptionsAsistencia[partidoId] = onSnapshot(
+                  collection(db, "partidos", partidoId, "asistencia"),
+                  (snapAsistentes) => {
+                    let yes = 0;
+                    let no = 0;
+                    const listContainer = document.getElementById(
+                      `attendees-${partidoId}`,
+                    );
+                    const countYesEl = document.getElementById(
+                      `count-yes-${partidoId}`,
+                    );
+                    const countNoEl = document.getElementById(
+                      `count-no-${partidoId}`,
+                    );
+                    const statusEl = document.getElementById(
+                      `status-${partidoId}`,
+                    );
+
+                    if (!listContainer) return;
+                    listContainer.innerHTML = "";
+
+                    if (snapAsistentes.empty) {
+                      listContainer.innerHTML =
+                        '<span class="text-slate-500 text-[10px]">Nadie ha votado todavía.</span>';
+                    }
+
+                    snapAsistentes.forEach((docA) => {
+                      const dataA = docA.data();
+                      if (dataA.asiste) yes++;
+                      else no++;
+
+                      if (
+                        currentUser &&
+                        docA.id === currentUser.uid &&
+                        statusEl
+                      ) {
+                        statusEl.textContent = dataA.asiste
+                          ? "✅ Asistes"
+                          : "❌ No asistes";
+                      }
+
+                      const badge = dataA.asiste
+                        ? '<span class="text-emerald-400">Sí</span>'
+                        : '<span class="text-rose-400">No</span>';
+                      listContainer.innerHTML += `
+                                        <div class="flex justify-between items-center bg-slate-950/40 px-2 py-1 rounded border border-slate-800/50">
+                                            <span class="text-slate-200">${dataA.nombre}</span>
+                                            ${badge}
+                                        </div>
+                                    `;
+                    });
+
+                    if (countYesEl) countYesEl.textContent = yes;
+                    if (countNoEl) countNoEl.textContent = no;
+                  },
+                );
+              }
+            }
+
+            const mvpInfo =
+              partido.mvp && partido.mvp !== "Por definir"
+                ? `<div class="mt-2 pt-2 border-t border-slate-800/60 text-[11px] text-amber-400 flex items-center gap-1.5"><i class="fa-solid fa-star"></i> <span>MVP / Destacado: <strong>${partido.mvp}</strong></span></div>`
+                : "";
+
+            calList.innerHTML += `
+                        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-md">
+                            <div class="flex justify-between items-center text-xs font-semibold mb-2">
+                                <span class="text-blue-400">${partido.jornada || "Jornada"}</span>
+                                <span class="px-2.5 py-0.5 rounded-full border text-[10px] ${badgeColor}">${partido.estado || "Pendiente"}</span>
+                            </div>
+                            <div class="flex justify-between items-center my-3">
+                                <span class="text-sm font-bold">${esLocal ? "🏠 Piratas S.B.C." : `✈️ ${partido.rival}`}</span>
+                                <span class="text-xs font-bold px-2.5 py-1 bg-slate-950 rounded-lg text-amber-400 border border-slate-800">${partido.marcador || "- : -"}</span>
+                                <span class="text-sm font-bold text-right">${esLocal ? partido.rival : "Piratas S.B.C."}</span>
+                            </div>
+                            <div class="mt-3 pt-3 border-t border-slate-800/80 space-y-1 text-xs text-slate-300">
+                                <p><i class="fa-regular fa-calendar text-blue-400 w-5"></i> ${partido.fecha} - ${partido.hora}</p>
+                                <p><i class="fa-solid fa-location-dot text-blue-400 w-5"></i> ${partido.campo}</p>
+                            </div>
+                            ${mvpInfo}
+                        </div>
+                    `;
+
+            if (adminCalList) {
+              adminCalList.innerHTML += `
+                            <div class="flex items-center justify-between p-3 bg-slate-950/60 rounded-xl border border-slate-800/80 mb-2">
+                                <div>
+                                    <p class="font-bold text-slate-200">${partido.jornada}: vs ${partido.rival}</p>
+                                    <p class="text-[10px] text-slate-400">${partido.fecha} • Resultado: <span class="text-amber-400 font-bold">${partido.marcador}</span></p>
+                                    <p class="text-[10px] text-amber-300">MVP: ${partido.mvp || "Por definir"}</p>
+                                </div>
+                                <div class="flex flex-col gap-1">
+                                    <button onclick="window.gestionarPartidoResultado('${partidoId}', '${partido.marcador}', '${partido.mvp}', '${partido.estado}')" class="bg-amber-600 hover:bg-amber-500 text-slate-950 font-bold px-2.5 py-1 rounded-lg text-[10px] transition">
+                                        Resultado / MVP
+                                    </button>
+                                    <div class="flex space-x-1">
+                                        <button onclick="window.editarPartido('${partidoId}', '${partido.jornada}', '${partido.rival}', '${partido.fecha}', '${partido.hora}', '${partido.campo}')" class="bg-blue-600 hover:bg-blue-500 text-white font-bold px-2 py-1 rounded-lg text-[10px] transition">
+                                            Editar
+                                        </button>
+                                        <button onclick="window.eliminarPartido('${partidoId}')" class="bg-rose-600/30 hover:bg-rose-600/50 text-rose-300 border border-rose-500/40 px-2 py-1 rounded-lg text-[10px] transition" title="Eliminar">
+                                            <i class="fa-solid fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+            }
+          });
+
+          if (!hayPartidosEnFechaProxima && containerInicio) {
+            containerInicio.innerHTML =
+              '<div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 text-center text-xs text-slate-400">No hay partidos pendientes en la próxima jornada.</div>';
+          }
+        });
+      }
+
+      document.addEventListener("DOMContentLoaded", () => {
+        escucharAvisos();
+        escucharPartidosPendientes();
+        escucharRoster();
+      });
+    </script>
+
+    <!-- Script de Navegación y PWA -->
+    <script>
+      function switchTab(tabName) {
+        ["inicio", "calendario", "roster", "admin", "auth"].forEach((tab) => {
+          const view = document.getElementById(`view-${tab}`);
+          const nav = document.getElementById(`nav-${tab}`);
+          if (view) view.classList.add("hidden");
+          if (nav) {
+            nav.classList.remove("text-blue-400", "text-amber-400");
+            nav.classList.add("text-slate-400");
+          }
+        });
+
+        const targetView = document.getElementById(`view-${tabName}`);
+        const targetNav = document.getElementById(`nav-${tabName}`);
+        if (targetView) targetView.classList.remove("hidden");
+        if (targetNav) {
+          targetNav.classList.remove("text-slate-400");
+          targetNav.classList.add(
+            tabName === "admin" ? "text-amber-400" : "text-blue-400",
+          );
+        }
+      }
+
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () => {
+          navigator.serviceWorker
+            .register("/service-worker.js")
+            .catch((err) => console.log("SW error:", err));
+        });
+      }
+
+      let deferredPrompt;
+      window.addEventListener("beforeinstallprompt", (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        const installBanner = document.getElementById("install-banner");
+        if (installBanner) installBanner.classList.remove("hidden");
+      });
+
+      const btnInstall = document.getElementById("btn-install");
+      if (btnInstall) {
+        btnInstall.addEventListener("click", async () => {
+          if (deferredPrompt) {
+            deferredPrompt.prompt();
+            deferredPrompt = null;
+            const installBanner = document.getElementById("install-banner");
+            if (installBanner) installBanner.classList.add("hidden");
+          }
+        });
+      }
+
+      function updateOnlineStatus() {
+        const badge = document.getElementById("offline-badge");
+        if (!badge) return;
+        if (!navigator.onLine) badge.classList.remove("hidden");
+        else badge.classList.add("hidden");
+      }
+      window.addEventListener("online", updateOnlineStatus);
+      window.addEventListener("offline", updateOnlineStatus);
+      updateOnlineStatus();
+    </script>
+  </body>
+</html>
